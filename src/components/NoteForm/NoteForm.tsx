@@ -1,12 +1,11 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { type CreateNotePayload } from '../../services/noteService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createNote, type CreateNotePayload } from '../../services/noteService';
 import css from './NoteForm.module.css';
 
 interface NoteFormProps {
-  onSubmit: (values: CreateNotePayload) => void;
   onCancel: () => void;
-  isSubmitting: boolean;
 }
 
 const validationSchema = Yup.object({
@@ -29,17 +28,23 @@ const initialValues: CreateNotePayload = {
   tag: 'Todo',
 };
 
-export default function NoteForm({
-  onSubmit,
-  onCancel,
-  isSubmitting,
-}: NoteFormProps) {
+export default function NoteForm({ onCancel }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      onCancel();
+    },
+  });
+
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={values => {
-        onSubmit(values);
+        createMutation.mutate(values);
       }}
     >
       <Form className={css.form}>
@@ -57,7 +62,7 @@ export default function NoteForm({
             as="textarea"
             rows={8}
             className={css.textarea}
-        />
+          />
           <ErrorMessage name="content" component="span" className={css.error} />
         </div>
 
@@ -80,12 +85,12 @@ export default function NoteForm({
           <button
             type="submit"
             className={css.submitButton}
-            disabled={isSubmitting}
+            disabled={createMutation.isPending}
           >
-            {isSubmitting ? 'Creating...' : 'Create note'}
+            {createMutation.isPending ? 'Creating...' : 'Create note'}
           </button>
         </div>
       </Form>
     </Formik>
   );
-};
+}
