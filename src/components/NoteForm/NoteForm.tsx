@@ -57,7 +57,7 @@ export default function NoteForm({
             as="textarea"
             rows={8}
             className={css.textarea}
-          />
+        />
           <ErrorMessage name="content" component="span" className={css.error} />
         </div>
 

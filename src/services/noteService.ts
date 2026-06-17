@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { type Note, type NoteTag } from '../types/note';
 
-// Створюємо базовий клієнт Axios
 const noteApi = axios.create({
   baseURL: 'https://notehub-public.goit.study/api',
   headers: {
@@ -9,7 +8,6 @@ const noteApi = axios.create({
   },
 });
 
-// Описуємо інтерфейси відповідей сервера
 export interface FetchNotesResponse {
   notes: Note[];
   total: number;
@@ -24,7 +22,6 @@ export interface CreateNotePayload {
   tag: NoteTag;
 }
 
-// Функції запитів
 export const fetchNotes = async (
   page: number,
   perPage: number,
